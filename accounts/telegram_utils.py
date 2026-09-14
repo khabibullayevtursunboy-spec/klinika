@@ -1,0 +1,29 @@
+import requests
+from django.conf import settings
+
+
+def send_telegram_message(chat_id, text, reply_markup=None, parse_mode="Markdown"):
+    """
+    aiogram'siz, to'g'ridan-to'g'ri Telegram Bot API orqali xabar yuborish.
+    """
+    if not chat_id:
+        return False
+
+    token = getattr(settings, "TELEGRAM_BOT_TOKEN", None)
+    if not token:
+        return False
+
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": parse_mode,
+    }
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
+
+    try:
+        response = requests.post(url, json=payload, timeout=5)
+        return response.status_code == 200
+    except requests.RequestException:
+        return False
