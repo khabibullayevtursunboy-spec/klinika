@@ -88,25 +88,16 @@ async def show_doctor_report(message: Message, state: FSMContext):
         return
 
     today_str = date.today().isoformat()
-    
+
     wait_msg = await message.answer("🔄 Hisobot shakllantirilmoqda...")
 
     report_data = await api_client.get_doctor_daily_report(token, today_str)
 
-    if report_data and isinstance(report_data, dict):
-        total = report_data.get("total_appointments", 0)
-        completed = report_data.get("completed", 0)
-        missed = report_data.get("missed", 0)
-        pending = report_data.get("pending", 0)
-        visits_count = report_data.get("visits_count", 0)
-    else:
-        appointments = await api_client.get_doctor_appointments(token, today_str)
-        
-        total = len(appointments)
-        completed = sum(1 for a in appointments if a.get("status") == "keldi")
-        missed = sum(1 for a in appointments if a.get("status") == "kelmadi")
-        pending = sum(1 for a in appointments if a.get("status") == "band")
-        visits_count = sum(1 for a in appointments if a.get("has_visit") or a.get("diagnosis"))
+    total = report_data.get("total_patients", 0)
+    completed = report_data.get("visited_count", 0)
+    missed = report_data.get("cancelled_count", 0)
+    pending = total - completed - missed
+    total_income = report_data.get("total_income", 0)
 
     report_text = (
         f"📊 **BUGUNGI HISOBOT ({today_str})**\n\n"
@@ -114,7 +105,7 @@ async def show_doctor_report(message: Message, state: FSMContext):
         f"✅ **Kelgan bemorlar:** {completed} ta\n"
         f"❌ **Kelmagan bemorlar:** {missed} ta\n"
         f"⏳ **Kutilayotganlar:** {pending} ta\n"
-        f"📝 **Qo'yilgan tashxislar:** {visits_count} ta\n\n"
+        f"💰 **Tushum:** {total_income:,.0f} so'm\n\n"
     )
 
     if total > 0:
@@ -124,8 +115,6 @@ async def show_doctor_report(message: Message, state: FSMContext):
         report_text += "📈 **Davomat ko'rsatkichi:** Ma'lumot yo'q"
 
     await wait_msg.edit_text(report_text, parse_mode="Markdown")
-
-
 @router.callback_query(F.data == "doc_nextday")
 async def show_next_day_appointments(callback: CallbackQuery, state: FSMContext):
     fsm_data = await state.get_data()
