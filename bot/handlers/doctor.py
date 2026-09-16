@@ -78,6 +78,54 @@ async def show_today_appointments(message: Message, state: FSMContext):
     await _show_appointments_for_date(message, state, date.today())
 
 
+@router.message(F.text.in_({"📊 Bugungi hisobot", "📊 Hisobot", "/report"}))
+async def show_doctor_report(message: Message, state: FSMContext):
+    fsm_data = await state.get_data()
+    token = fsm_data.get("token")
+
+    if not token:
+        await message.answer("❌ Foydalanuvchi tokeni topilmadi.\n\nIltimos, /start bosib qaytadan kiring.")
+        return
+
+    today_str = date.today().isoformat()
+    
+    wait_msg = await message.answer("🔄 Hisobot shakllantirilmoqda...")
+
+    report_data = await api_client.get_doctor_daily_report(token, today_str)
+
+    if report_data and isinstance(report_data, dict):
+        total = report_data.get("total_appointments", 0)
+        completed = report_data.get("completed", 0)
+        missed = report_data.get("missed", 0)
+        pending = report_data.get("pending", 0)
+        visits_count = report_data.get("visits_count", 0)
+    else:
+        appointments = await api_client.get_doctor_appointments(token, today_str)
+        
+        total = len(appointments)
+        completed = sum(1 for a in appointments if a.get("status") == "keldi")
+        missed = sum(1 for a in appointments if a.get("status") == "kelmadi")
+        pending = sum(1 for a in appointments if a.get("status") == "band")
+        visits_count = sum(1 for a in appointments if a.get("has_visit") or a.get("diagnosis"))
+
+    report_text = (
+        f"📊 **BUGUNGI HISOBOT ({today_str})**\n\n"
+        f"🔹 **Jami yozilganlar:** {total} ta\n"
+        f"✅ **Kelgan bemorlar:** {completed} ta\n"
+        f"❌ **Kelmagan bemorlar:** {missed} ta\n"
+        f"⏳ **Kutilayotganlar:** {pending} ta\n"
+        f"📝 **Qo'yilgan tashxislar:** {visits_count} ta\n\n"
+    )
+
+    if total > 0:
+        attendance_rate = round((completed / total) * 100, 1)
+        report_text += f"📈 **Davomat ko'rsatkichi:** {attendance_rate}%"
+    else:
+        report_text += "📈 **Davomat ko'rsatkichi:** Ma'lumot yo'q"
+
+    await wait_msg.edit_text(report_text, parse_mode="Markdown")
+
+
 @router.callback_query(F.data == "doc_nextday")
 async def show_next_day_appointments(callback: CallbackQuery, state: FSMContext):
     fsm_data = await state.get_data()
@@ -131,7 +179,6 @@ async def process_doctor_status(callback: CallbackQuery, state: FSMContext):
         await callback.answer()
         return
 
-    
     status_code, response = await api_client.update_appointment_status(
         token, app_id, "keldi"
     )

@@ -4,8 +4,7 @@ from django.conf import settings
 
 def send_telegram_message(chat_id, text, reply_markup=None, parse_mode="Markdown"):
     """
-    aiogram'siz, to'g'ridan-to'g'ri Telegram Bot API orqali xabar yuborish.
-    Shifokorlarga bildirishnoma yuborish uchun ishlatiladi.
+    
     """
     if not chat_id:
         return

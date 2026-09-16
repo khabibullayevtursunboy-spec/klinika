@@ -3,6 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 from bot.api import api_client
+from aiogram.types import Message, URLInputFile
 from bot.keyboards.inline import (
     phone_keyboard,
     main_menu_keyboard,
@@ -14,8 +15,11 @@ router = Router()
 
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
+    photo_url = ""
     await state.clear()
+    
     await message.answer(
+        
         "Xush kelibsiz! Klinika botidan foydalanish uchun telefon raqamingizni yuboring:",
         reply_markup=phone_keyboard(),
     )

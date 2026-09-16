@@ -11,7 +11,9 @@ def phone_keyboard():
         keyboard=[
             [
                 KeyboardButton(
-                    text="📱 Telefon raqamni yuborish", request_contact=True
+                    text="📱 Telefon raqamni yuborish",
+                    request_contact=True,
+                    style="success",  # Ko'k rang
                 )
             ]
         ],
@@ -23,10 +25,21 @@ def phone_keyboard():
 def main_menu_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="📅 Navbat olish")],
             [
-                KeyboardButton(text="📋 Mening navbatlarim"),
-                KeyboardButton(text="❌ Bekor qilish"),
+                KeyboardButton(
+                    text="📅 Navbat olish",
+                    style="success",  # Yashil rang
+                )
+            ],
+            [
+                KeyboardButton(
+                    text="📋 Mening navbatlarim",
+                    style="success",  # Ko'k rang
+                ),
+                KeyboardButton(
+                    text="❌ Bekor qilish",
+                    style="danger",  # Qizil rang
+                ),
             ],
         ],
         resize_keyboard=True,
@@ -43,6 +56,7 @@ def build_inline_keyboard(items, item_type):
                     InlineKeyboardButton(
                         text=spec["name"],
                         callback_data=f"spec_{spec['id']}",
+                        style="primary",
                     )
                 ]
             )
@@ -59,7 +73,9 @@ def build_inline_keyboard(items, item_type):
             builder.append(
                 [
                     InlineKeyboardButton(
-                        text=btn_text, callback_data=f"doc_{doc['id']}"
+                        text=btn_text,
+                        callback_data=f"doc_{doc['id']}",
+                        style="primary",
                     )
                 ]
             )
@@ -67,7 +83,11 @@ def build_inline_keyboard(items, item_type):
     elif item_type == "date":
         row = []
         for day in items:
-            row.append(InlineKeyboardButton(text=day, callback_data=f"date_{day}"))
+            row.append(
+                InlineKeyboardButton(
+                    text=day, callback_data=f"date_{day}", style="primary"
+                )
+            )
             if len(row) == 2:
                 builder.append(row)
                 row = []
@@ -80,7 +100,9 @@ def build_inline_keyboard(items, item_type):
             start_time = slot["start_time"][:5]
             row.append(
                 InlineKeyboardButton(
-                    text=start_time, callback_data=f"slot_{slot['id']}_{start_time}"
+                    text=start_time,
+                    callback_data=f"slot_{slot['id']}_{start_time}",
+                    style="success",
                 )
             )
             if len(row) == 3:
@@ -96,8 +118,16 @@ def confirm_keyboard():
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="✅ Tasdiqlash", callback_data="confirm_app"),
-                InlineKeyboardButton(text="❌ Bekor qilish", callback_data="cancel_app"),
+                InlineKeyboardButton(
+                    text="✅ Tasdiqlash",
+                    callback_data="confirm_app",
+                    style="success",  # Yashil rang
+                ),
+                InlineKeyboardButton(
+                    text="❌ Bekor qilish",
+                    callback_data="cancel_app",
+                    style="danger",  # Qizil rang
+                ),
             ]
         ]
     )
@@ -106,7 +136,16 @@ def confirm_keyboard():
 def doctor_menu_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="📋 Bugungi qabul")],
+            [
+                KeyboardButton(
+                    text="📋 Bugungi qabul",
+                    style="primary",
+                ),
+                KeyboardButton(
+                    text="📊 Bugungi hisobot",
+                    style="primary",
+                ),
+            ],
         ],
         resize_keyboard=True,
     )
@@ -117,10 +156,14 @@ def appointment_action_keyboard(appointment_id: int):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="✅ Keldi", callback_data=f"docstatus_{appointment_id}_keldi"
+                    text="✅ Keldi",
+                    callback_data=f"docstatus_{appointment_id}_keldi",
+                    style="success",  # Yashil rang
                 ),
                 InlineKeyboardButton(
-                    text="❌ Kelmadi", callback_data=f"docstatus_{appointment_id}_kelmadi"
+                    text="❌ Kelmadi",
+                    callback_data=f"docstatus_{appointment_id}_kelmadi",
+                    style="danger",  # Qizil rang
                 ),
             ]
         ]
@@ -132,7 +175,9 @@ def next_day_keyboard():
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="➡️ Ertangi kun", callback_data="doc_nextday"
+                    text="➡️ Ertangi kun",
+                    callback_data="doc_nextday",
+                    style="primary",
                 )
             ]
         ]
@@ -143,11 +188,19 @@ def _pagination_row(prefix: str, page: int, has_next: bool, has_previous: bool):
     row = []
     if has_previous:
         row.append(
-            InlineKeyboardButton(text="⬅️ Oldingi", callback_data=f"{prefix}_{page - 1}")
+            InlineKeyboardButton(
+                text="⬅️ Oldingi",
+                callback_data=f"{prefix}_{page - 1}",
+                style="primary",
+            )
         )
     if has_next:
         row.append(
-            InlineKeyboardButton(text="Keyingi ➡️", callback_data=f"{prefix}_{page + 1}")
+            InlineKeyboardButton(
+                text="Keyingi ➡️",
+                callback_data=f"{prefix}_{page + 1}",
+                style="primary",
+            )
         )
     if not row:
         return None
